@@ -1,5 +1,10 @@
 package com.example.d_place;
 
+import static java.security.AccessController.getContext;
+
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
@@ -18,11 +23,16 @@ import okio.ByteString;
 
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -33,7 +43,7 @@ import okio.ByteString;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button start;
+    private TextView start;
     private TextView output;
     private OkHttpClient client;
     private GridLayout outercontainer;
@@ -41,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
     private EchoWebSocketListener listener;
     private int buttonsize;
     private Request request;
-    private TextView text1,text2,text3;
+    private TextView text1,text2,text3,text4,text5,text6;
+    private String userName;
+
     private int clicked=1;
 
     private final class EchoWebSocketListener extends WebSocketListener {
@@ -49,14 +61,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
-            webSocket.send("Hello, it's SSaurel !");
-            webSocket.close(NORMAL_CLOSURE_STATUS, "Goodbye !");
+
+
         }
 
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
-            output("Receiving : " + text);
+            output(text);
+
         }
 
         @Override
@@ -80,11 +93,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        start = (Button) findViewById(R.id.start);
+        start = (TextView) findViewById(R.id.start);
         output = (TextView) findViewById(R.id.output);
         text1 = findViewById(R.id.text1);
         text2 = findViewById(R.id.text2);
         text3 = findViewById(R.id.text3);
+        text4 = findViewById(R.id.text4);
+        text5 = findViewById(R.id.text5);
+        text6 = findViewById(R.id.text6);
+        Intent intent = getIntent();
+        userName = intent.getStringExtra("username");
+        start.setText(userName);
         text1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,9 +122,27 @@ public class MainActivity extends AppCompatActivity {
                 clicked=3;
             }
         });
+        text4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clicked=4;
+            }
+        });
+        text5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clicked=5;
+            }
+        });
+        text6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clicked=6;
+            }
+        });
 
 
-        request = new Request.Builder().url("http://127.0.0.1:8000/").build();
+        request = new Request.Builder().url("ws://10.0.2.2:8000/ws/1723360801681").build();
         listener = new EchoWebSocketListener();
         outercontainer = findViewById(R.id.buttonContainer);
         outercontainer.setColumnCount(1);
@@ -138,12 +175,7 @@ public class MainActivity extends AppCompatActivity {
             innercontainer.addView(button, params);
         }
 
-        start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                start();
-            }
-        });
+
 
     }
 
@@ -153,19 +185,63 @@ public class MainActivity extends AppCompatActivity {
         }else if(clicked==2){
             button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.blue, null));
         }
-        else{
+        else if(clicked==3){
             button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.red, null));
         }
-        listener.onMessage(ws,button.getTag().toString());
-        ws.send(button.getTag().toString());
+        else if(clicked==4){
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.yellow, null));
+        }
+        else if(clicked==5){
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.green, null));
+        } else{
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.white, null));
+
+        }
+        ObjectAnimator XUp = ObjectAnimator.ofFloat(button, "scaleX", 1f, 1.2f);
+        ObjectAnimator XDown = ObjectAnimator.ofFloat(button, "scaleX", 1.2f, 1f);
+        ObjectAnimator YUp = ObjectAnimator.ofFloat(button, "scaleY", 1f, 1.2f);
+        ObjectAnimator YDown = ObjectAnimator.ofFloat(button, "scaleY", 1.2f, 1f);
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(XUp, YUp,XDown,YDown);
+        animatorSet.setDuration(200);
+        animatorSet.start();
+        //listener.onMessage(ws,button.getTag().toString());
+        ws.send(button.getTag().toString() + clicked);
+
+    }
+    private void onButtonClick2(Button button, int clicked) {
+        if(clicked==1) {
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.black, null));
+        }else if(clicked==2){
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.blue, null));
+        }
+        else if(clicked==3){
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.red, null));
+        }
+        else if(clicked==4){
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.yellow, null));
+        }
+        else if(clicked==5){
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.green, null));
+        } else{
+            button.setBackground(ResourcesCompat.getDrawable(getResources(), R.color.white, null));
+
+        }
+        ObjectAnimator XUp = ObjectAnimator.ofFloat(button, "scaleX", 1f, 1.2f);
+        ObjectAnimator XDown = ObjectAnimator.ofFloat(button, "scaleX", 1.2f, 1f);
+        ObjectAnimator YUp = ObjectAnimator.ofFloat(button, "scaleY", 1f, 1.2f);
+        ObjectAnimator YDown = ObjectAnimator.ofFloat(button, "scaleY", 1.2f, 1f);
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(XUp, YUp,XDown,YDown);
+        animatorSet.setDuration(200);
+        animatorSet.start();
+
 
     }
 
-    private void start() {
 
-
-
-    }
     @Nullable
     private Button getButtonAt(int row, int col) {
         int index = row * 10 + col;
@@ -180,7 +256,22 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                output.setText(output.getText().toString() + "\n\n" + txt);
+
+
+                //output.setText(output.getText().toString() + "\n" + txt);
+                String s = output.getText().toString();
+                String t= txt.trim();
+                Toast.makeText(MainActivity.this, t, Toast.LENGTH_SHORT).show();
+                if(t!=null && t.matches("\\d{3}")){
+                    int a = Character.getNumericValue(t.charAt(0));
+                    int b = Character.getNumericValue(t.charAt(1));
+                    int c = Character.getNumericValue(t.charAt(2));
+                    Button button = getButtonAt(a, b);
+                    onButtonClick2(button,c);
+
+                }
+
+
             }
         });
     }
